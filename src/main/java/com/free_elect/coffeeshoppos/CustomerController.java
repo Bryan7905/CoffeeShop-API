@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "https://coffeeshop-ui.onrender.com")
 @RestController
 @RequestMapping("/api/customers")
 public class CustomerController {
