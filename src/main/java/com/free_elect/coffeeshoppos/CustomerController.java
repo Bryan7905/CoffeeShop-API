@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "https://coffeeshop-ui.onrender.com")
 @RestController
@@ -16,8 +17,18 @@ public class CustomerController {
     }
 
     @GetMapping
-    public List<Customer> list() {
-        return repo.findAll();
+    public ResponseEntity<List<CustomerDTO>> listCustomers() {
+        List<Customer> customers = repo.findAll();
+        List<CustomerDTO> dtos = customers.stream()
+                .map(c -> new CustomerDTO(
+                        c.getId(),
+                        c.getName(),
+                        c.getContact(),
+                        c.getTransactions() == null ? 0 : c.getTransactions().size()
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/{id}")
