@@ -1,38 +1,40 @@
 package com.free_elect.coffeeshoppos;
 
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
+import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
-import java.util.List;
+import java.time.Instant;
 
-@Configuration
-public class DataLoader {
+@Component
+public class DataLoader implements CommandLineRunner {
 
-    @Bean
-    public CommandLineRunner loadInitialData(CustomerRepository customerRepo, TransactionRepository tnxRepo) {
-        return args -> {
-            if (customerRepo.count() == 0) {
-                Customer c1 = new Customer("Alice Smith", "alice@example.com");
-                Customer c2 = new Customer("Bob Johnson", "555-1234");
-                Customer c3 = new Customer("Charlie Brown", "charlie@mail.com");
+    private final CustomerRepository customerRepo;
+    private final TransactionRepository txRepo;
 
-                customerRepo.saveAll(List.of(c1, c2, c3));
+    public DataLoader(CustomerRepository customerRepo, TransactionRepository txRepo) {
+        this.customerRepo = customerRepo;
+        this.txRepo = txRepo;
+    }
 
-                // Example transaction: { id: 1001, customerId: 1, items: [{ name: 'Latte', qty: 1, price: 5 }], total: 5, discount: 0.5, finalTotal: 4.5 }
-                Transaction t = new Transaction();
-                t.setCustomer(c1);
-                t.setItems(List.of(new TransactionItem("Latte", 1, BigDecimal.valueOf(5))));
-                t.setTotal(BigDecimal.valueOf(5));
-                t.setDiscount(BigDecimal.valueOf(0.5));
-                t.setFinalTotal(BigDecimal.valueOf(4.5));
-                tnxRepo.save(t);
+    @Override
+    public void run(String... args) throws Exception {
+        // create a customer using convenience constructor
+        Customer c = new Customer("Ana", "09171234567");
+        c = customerRepo.save(c); // now c.getId() is available
 
-                // maintain bidirectional list
-                c1.getTransactions().add(t);
-                customerRepo.save(c1);
-            }
-        };
+        // create a transaction
+        Transaction t = new Transaction();
+        t.setCustomerId(c.getId()); // if you use customerId pattern
+        t.setTotal(new BigDecimal("532.00"));
+        t.setDiscount(new BigDecimal("26.60"));
+        t.setFinalTotal(new BigDecimal("505.40"));
+        t.setTransactionDate(Instant.now());
+
+        // add items using convenience constructor
+        TransactionItem item1 = new TransactionItem("Latte", 2, new BigDecimal("266.00"));
+        item1.setCategory("Coffee");
+        t.addItem(item1);
+
+        txRepo.save(t);
     }
 }
