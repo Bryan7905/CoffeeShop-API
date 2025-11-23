@@ -8,7 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/reports")
-@CrossOrigin(origins = "${app.cors.allowed-origins:http://localhost:5173}")
+@CrossOrigin(origins = "${app.cors.allowed-origins:https://coffeeshop-ui.onrender.com}")
 public class ReportController {
 
     private final ReportService service;
